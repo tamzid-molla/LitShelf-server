@@ -115,6 +115,32 @@ app.get('/users/all', async (req, res) => {
       res.send(result);
     })
 
+    //Patch API to update user profile
+    app.patch('/users/:email', async (req, res) => {
+      const email = req.params.email;
+      const { name, photoURL, phone, location, bio, website, favoriteGenre, readingGoal } = req.body;
+      
+      const updateDoc = {
+        $set: {
+          name: name,
+          photoURL: photoURL,
+          phone: phone,
+          location: location,
+          bio: bio,
+          website: website,
+          favoriteGenre: favoriteGenre,
+          readingGoal: readingGoal,
+          updatedAt: new Date()
+        }
+      };
+      
+      const result = await userCollections.updateOne(
+        { email: email },
+        updateDoc
+      );
+      res.send(result);
+    })
+
 
     // Post API to add a new book
     app.post('/books',verifyJWT, async (req, res) => {
