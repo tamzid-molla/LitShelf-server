@@ -316,6 +316,7 @@ async function run() {
       try {
         const paymentData = req.body;
         const trxId = `TrID${Math.random().toString(36).substring(2, 15)}`;
+        paymentData.tran_id = trxId;
 
         const initiate = {
           store_id: process.env.SSL_STORE_ID,
@@ -390,21 +391,32 @@ async function run() {
         }
 
         // Update user subscription in database
+        const subscription = await subscriptionCollections.findOne({
+          tran_id: validationResponse.data?.tran_id || "",
+        });
         const updatePayment = await subscriptionCollections.updateOne(
-          { transaction_id: validationResponse.data?.tran_id || "" },
+          { tran_id: subscription.tran_id || "" },
           { $set: { status: "success" } }
         );
 
         // Update user role to premium in users collection
-        await userCollections.updateOne(
-          { email: validationResponse.data?.cus_email },
-          { $set: { subscription_status: "active", subscription_date: new Date() } }
-        );
 
-        //redirect to success page
-        res.redirect("http://localhost:5173/payment/success");
+        const updateUser = await userCollections.updateOne(
+          { email: subscription.cus_email || "" },
+          {
+            $set: {
+              subscription_type: subscription.product_name,
+              subscription_status: "active",
+              subscription_date: new Date(),
+            },
+          }
+        );
+        console.log(updatePayment, updateUser);
+        if (updatePayment.modifiedCount && updateUser.modifiedCount) {
+          res.redirect("http://localhost:5173/payment/success");
+        }
       } catch (error) {
-        // console.error("Error processing IPN:", error);
+        console.error("Error processing IPN:", error);
         res.status(500).send("Error processing IPN");
       }
     });
