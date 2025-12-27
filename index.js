@@ -408,6 +408,7 @@ async function run() {
               subscription_type: subscription.product_name,
               subscription_status: "active",
               subscription_date: new Date(),
+              books_added: subscription.books_added,
             },
           }
         );
