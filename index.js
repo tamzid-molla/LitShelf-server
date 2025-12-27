@@ -324,10 +324,10 @@ async function run() {
           total_amount: paymentData.amount,
           currency: paymentData.currency,
           tran_id: trxId,
-          success_url: "http://localhost:3001/ssl/ipn",
-          fail_url: "http://localhost:3001/ssl/ipn",
-          cancel_url: "http://localhost:3001/ssl/ipn",
-          ipn_url: "http://localhost:3001/ssl/ipn",
+          success_url: `${process.env.SERVER_BASE_URL}/ssl/ipn`,
+          fail_url: `${process.env.SERVER_BASE_URL}/ssl/ipn`,
+          cancel_url: `${process.env.SERVER_BASE_URL}/ssl/ipn`,
+          ipn_url: `${process.env.SERVER_BASE_URL}/ssl/ipn`,
           shipping_method: "N/A",
           product_name: paymentData.product_name,
           product_category: paymentData.product_category,
@@ -382,9 +382,9 @@ async function run() {
         );
         if (validationResponse.data?.status !== "VALID") {
           if (ipnData?.status === "CANCELLED") {
-            res.redirect("http://localhost:5173/subscribe");
+            res.redirect(`${process.env.CLIENT_BASE_URL}/subscribe`);
           } else if (ipnData?.status === "FAILED") {
-            res.redirect("http://localhost:5173/payment/fail");
+            res.redirect(`${process.env.CLIENT_BASE_URL}/payment/fail`);
           }
           res.status(400).send("Invalid IPN data");
           return;
@@ -412,9 +412,8 @@ async function run() {
             },
           }
         );
-        console.log(updatePayment, updateUser);
         if (updatePayment.modifiedCount && updateUser.modifiedCount) {
-          res.redirect("http://localhost:5173/payment/success");
+          res.redirect(`${process.env.CLIENT_BASE_URL}/payment/success`);
         }
       } catch (error) {
         console.error("Error processing IPN:", error);
